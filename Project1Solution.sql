@@ -43,13 +43,13 @@ CREATE TABLE Borrower (
 	Borrower_ID int not null PRIMARY KEY,
 	fname VARCHAR (60) NOT NULL,
 	lname VARCHAR (60) NOT NULL,
-	Borrower_Phone_Number VARCHAR(15)
+	Borrower_Phone_Number VARCHAR(15) NOT NULL
 );
 
 CREATE TABLE Artist (
 	Artist_ID int not null PRIMARY KEY,
 	fname VARCHAR (60) NOT NULL,
-	lname VARCHAR (60) NOT NULL,
+	lname VARCHAR (60) NULL,
 	Artist_Type_ID int not null REFERENCES ArtistType(Artist_Type_ID)
 );
 
