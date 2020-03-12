@@ -4,6 +4,7 @@
 /*                                                                  */
 /*  2/28/2020	Eric Walter		Initial deployed                    */
 /*  3/5/2020	Eric Walter		added insert statements to all tables.*/
+/*  3/12/2020	Eric Walter		added reports about cd status       */
 /********************************************************************/
 
 USE master;
@@ -282,7 +283,61 @@ INSERT INTO [dbo].[CDArtist]
 
 GO
 
---H. List the disks on load taht have not been returned
+--H. List the disks on load that have not been returned
 SELECT borrower_ID as Borrower_ID, CD_ID as Disk_ID, borrowed_date as Borrowed_Date, returned_date as Return_date
 FROM CDBorrower
 WHERE returned_date IS NULL;
+
+
+-------------------------------------- Project 4 Starts here----------------------------------------------------------
+
+--3. Show the disks in your database and any associated Individual artists only
+select CD_name as 'CD Name', convert(varchar(10), Release_Date, 101) as 'Release Date', fname as 'Artist First Name', lname as 'Artist Last Name'
+	--substring(fname, 1, charindex(fname, ' '))
+from CD
+join CDArtist on CD.CD_ID = CDArtist.CD_ID
+join Artist on CDArtist.artist_ID = Artist.Artist_ID
+where Artist_Type_ID = 1
+order by lname, fname, CD_name;
+go
+
+--4. Create a view called View_Individual_Artist that shows the artists’ names and not group names. Include the artist id in the view definition but do not display the id in your output.
+create view View_Individual_Artists as
+	select Artist_ID, fname, lname
+	from Artist
+	where Artist_Type_ID = 1;
+go
+select fname as 'First Name', lname as 'Last Name'
+from View_Individual_Artists
+order by lname, fname;
+
+--5. Show the disks in your database and any associated Group artists only. Use the View_Individual_Artist view
+select CD_name as 'CD Name', convert(varchar(10), Release_Date, 101) as 'Release Date', fname as 'Group Name'
+FROM CD
+join CDArtist on CD.CD_ID = CDArtist.CD_ID
+join Artist on CDArtist.artist_ID = Artist.Artist_ID
+where artist.Artist_ID not in (select artist_ID from View_Individual_Artists)
+order by [Group Name], [CD Name];
+
+--6. Show which disks have been borrowed and who borrowed them.
+SELECT fname as 'First', lname as 'Last', CD_name as 'CD Name', borrowed_date as 'Borrowed Date', returned_date as 'Returned Date'
+from Borrower b
+join CDBorrower  db on b.Borrower_ID = db.borrower_ID
+join CD d on db.CD_ID = d.CD_ID
+order by [CD Name], lname, fname, borrowed_date, returned_date;
+
+--7. Show the number of times each disk has been borrowed.
+select c.CD_ID, CD_name, count(*) as 'Times Borrowed'
+from CD C
+join CDBorrower cb on c.CD_ID = cb.CD_ID
+group by c.CD_ID, CD_name
+-- having cont(*) > 1
+order by CD_ID, CD_name;
+
+--8. Show the disks outstanding or on-loan and who has each disk.
+SELECT CD_name as 'CD name', borrowed_date as Borrowed, returned_date as Returned, lname as 'Last Name'
+from CD c
+join CDBorrower cb on c.CD_ID = cb.CD_ID
+join Borrower b on cb.borrower_ID = b.Borrower_ID
+WHERE returned_date is null
+order by CD_name;
