@@ -5,6 +5,7 @@
 /*  2/28/2020	Eric Walter		Initial deployed                    */
 /*  3/5/2020	Eric Walter		added insert statements to all tables.*/
 /*  3/12/2020	Eric Walter		added reports about cd status       */
+/*  4/8/2020	Eric Walter		Added stored procs for Project 5    */
 /********************************************************************/
 
 USE master;
@@ -341,3 +342,199 @@ join CDBorrower cb on c.CD_ID = cb.CD_ID
 join Borrower b on cb.borrower_ID = b.Borrower_ID
 WHERE returned_date is null
 order by CD_name;
+
+
+--Project 5 Stored Procedures
+--2.Create Insert, Update, and Delete stored procedures for the artist table. Update procedure accepts input parameters for all columns. Insert accepts all columns as input parameters except for identity fields. Delete accepts a primary key value for delete. 
+DROP PROCEDURE IF EXISTS sp_ins_artist;
+go
+CREATE PROCEDURE sp_ins_artist
+	@artist_id int, @fname varchar(60), @lname varchar(60) = NULL, @artist_type_id int
+AS
+	BEGIN TRY
+		INSERT INTO [dbo].[Artist]
+				   ([Artist_ID],[fname],[lname],[Artist_Type_ID])
+			 VALUES
+				   (@artist_id,@fname,@lname,@artist_type_id);
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+GRANT EXECUTE ON sp_ins_artist TO diskUserEW;
+EXEC sp_ins_artist 55, 'Cher', NULL, 1;
+EXEC sp_ins_artist 56, 'Jared', 'Leto', 11;
+GO
+
+DROP PROCEDURE IF EXISTS sp_upd_artist;
+go
+
+CREATE PROCEDURE sp_upd_artist
+	@artist_id int, @fname varchar(60), @lname varchar(60) = NULL, @artist_type_id int
+AS
+	BEGIN TRY
+		UPDATE [dbo].[Artist]
+		   SET [Artist_ID] = @artist_id
+			  ,[fname] = @fname
+			  ,[lname] = @lname
+			  ,[Artist_Type_ID] = @artist_type_id
+		 WHERE artist_id = @artist_id;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+GRANT EXECUTE ON sp_upd_artist TO diskUserEW;
+EXEC sp_upd_artist 55, 'Cher', 'Updated', 2;
+EXEC sp_upd_artist 56, 'Jared', 'Leto', 11;
+GO
+
+DROP PROCEDURE IF EXISTS sp_del_artist;
+go
+
+CREATE PROCEDURE sp_del_artist
+	@artist_id int
+AS
+	BEGIN TRY	
+		DELETE FROM [dbo].[Artist]
+			WHERE artist_id = @artist_id
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+
+GRANT EXECUTE ON sp_del_artist TO diskUserEW;
+EXEC sp_del_artist 55;
+EXEC sp_del_artist 56;
+GO
+
+--3. Create Insert, Update, and Delete stored procedures for the borrower table. Update procedure accepts input parameters for all columns. Insert accepts all columns as input parameters except for identity fields. Delete accepts a primary key value for delete. 
+DROP PROCEDURE IF EXISTS sp_ins_borrower;
+go
+CREATE PROCEDURE sp_ins_borrower
+	@borrower_id int, @fname varchar(60), @lname varchar(60), @phone_num varchar(50)
+AS
+	BEGIN TRY
+		INSERT INTO [dbo].[Borrower]
+				   ([Borrower_ID]
+				   ,[fname]
+				   ,[lname],[Borrower_Phone_Number])
+			 VALUES
+				   (@borrower_id,@fname,@lname,@phone_num)
+
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+GRANT EXECUTE ON sp_ins_artist TO diskUserEW;
+EXEC sp_ins_borrower 55, 'Eeyore', 'Donkey', '2082221234';
+EXEC sp_ins_borrower 56, 'Eeyore', 'Donkey', '2082221234';
+GO
+
+DROP PROCEDURE IF EXISTS sp_upd_borrower;
+go
+CREATE PROCEDURE sp_upd_borrower
+	@borrower_id int, @fname varchar(60), @lname varchar(60), @phone_num varchar(50)
+AS
+	BEGIN TRY
+		UPDATE [dbo].[Borrower]
+		   SET [Borrower_ID] = @borrower_id,[fname] = @fname,[lname] = @lname,[Borrower_Phone_Number] = @phone_num
+		 WHERE borrower_id = @borrower_id;
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+GRANT EXECUTE ON sp_upd_artist TO diskUserEW;
+EXEC sp_upd_borrower 55, 'Eeyore', 'Donkey', '208-222-1234';
+EXEC sp_upd_borrower 55, 'Eeyore', NULL, '208-222-1234';
+GO
+
+DROP PROCEDURE IF EXISTS sp_del_borrower;
+go
+CREATE PROCEDURE sp_del_borrower
+	@borrower_id int
+AS
+	BEGIN TRY
+		DELETE FROM [dbo].[Borrower]
+			WHERE borrower_id = @borrower_id
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+GRANT EXECUTE ON sp_del_artist TO diskUserEW;
+EXEC sp_del_borrower 55;
+EXEC sp_del_borrower 2;
+GO
+
+--4. Create Insert, Update, and Delete stored procedures for the disk table. Update procedure accepts input parameters for all columns. Insert accepts all columns as input parameters except for identity fields. Delete accepts a primary key value for delete.
+
+DROP PROCEDURE IF EXISTS sp_ins_CD;
+go
+CREATE PROCEDURE sp_ins_CD
+	@cd_id int, @cd_name varchar(60), @release_date date, @genre_id int, @status_id int, @type_id int
+AS
+	BEGIN TRY
+		INSERT INTO [dbo].[CD]
+				   ([CD_ID],[CD_name],[Release_Date],[Genre_ID],[Status_ID],[TypeID])
+			 VALUES
+				   (@cd_id,@cd_name,@release_date,@genre_id,@status_id,@type_id)
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+GRANT EXECUTE ON sp_ins_CD TO diskUserEW;
+EXEC sp_ins_CD 21, 'Lightning Bolt', '2/2/2013', 4,1,1;
+EXEC sp_ins_CD 22, 'eeyore', '2/2/2011', null,1,1;
+GO
+
+DROP PROCEDURE IF EXISTS sp_upd_CD;
+go
+CREATE PROCEDURE sp_upd_CD
+	@cd_id int, @cd_name varchar(60), @release_date date, @genre_id int, @status_id int, @type_id int
+AS
+	BEGIN TRY
+		UPDATE [dbo].[CD]
+		   SET [CD_ID] = @cd_id,[CD_name] = @cd_name,[Release_Date] = @release_date,[Genre_ID] = @genre_id,[Status_ID] = @status_id,[TypeID] = @type_id
+		 WHERE cd_id = @cd_id
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+GRANT EXECUTE ON sp_upd_CD TO diskUserEW;
+EXEC sp_upd_CD 21, 'Lightning Bolt Updated', '12/12/2013', 3,2,2;
+EXEC sp_upd_CD 21, 'eeyore', '2/2/2011', null,1,1;
+GO
+
+DROP PROCEDURE IF EXISTS sp_del_CD;
+go
+CREATE PROCEDURE sp_del_CD
+	@cd_id int
+AS
+	BEGIN TRY
+		DELETE FROM [dbo].[CD]
+			  WHERE cd_id = @cd_id
+	END TRY
+	BEGIN CATCH
+		PRINT 'An error occured.';
+		PRINT 'Message: ' + Convert(varchar(200), ERROR_MESSAGE());
+	END CATCH
+GO
+GRANT EXECUTE ON sp_del_CD TO diskUserEW;
+EXEC sp_del_CD 21;
+EXEC sp_del_CD 4;
+GO
